@@ -9,7 +9,7 @@ import requests
 from io import StringIO
 
     
-dust_input_endpoint = 'https://example.com/api'
+dust_api_url = 'https://example.com/api'
 
 
 def run_app():
@@ -34,17 +34,24 @@ def run_app():
 
         # Join the lines back into a string
         string_data = '\n'.join(lines)
-
-        # Can be used wherever a "file-like" object is accepted:
-        dataframe = pd.read_csv(uploaded_file)
-        st.write(dataframe)
-
-        url = dust_input_endpoint
         data = {'key': string_data}
 
-        response = requests.post(url, json=data)
+        # #Can be used wherever a "file-like" object is accepted:
+        # dataframe = pd.read_csv(uploaded_file)
+        # st.write(dataframe)
 
-        print(response.content)
+        
+
+        # Send the data to the API
+        def send_request(df):
+            response = requests.post(dust_api_url, json=data)
+            if response.status_code == 200:
+                return response.json()
+                print(response.content)
+            else:
+                return None
+
+            
 
 
 
