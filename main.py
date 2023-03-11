@@ -9,7 +9,7 @@ import requests
 from io import StringIO
 
 #define endpoint    
-dust_api_url = 'https://example.com/api'
+dust_api_url = []
 
 #1 Upload Csv file
 def upload_csv():
@@ -31,17 +31,41 @@ def upload_csv():
 
         # Join the lines back into a string
         string_data = '\n'.join(lines)
-        data = {'key': string_data}
+        data_str = {'key': string_data}
 
         # #Can be used wherever a "file-like" object is accepted:
         # dataframe = pd.read_csv(uploaded_file)
         # st.write(dataframe)
-        return data
+
+        # Format the entire command string
+        cmd_str = f'curl -X "POST" "https://dust.tt/api/v1/apps/BenderV/67b0f56f46/runs" \\\n\
+            -H \'Authorization: Bearer sk-83fa1f2fe42be11a814021401360f383\' \\\n\
+            -H \'Content-Type: application/json\' \\\n\
+            -H \'Cookie: GCLB="4df13f2821b3cf96"\' \\\n\
+            -d $\'{{\n\
+            "config": {{\n\
+            "MODEL": {{\n\
+            "use_cache": true,\n\
+            "model_id": "code-davinci-002",\n\
+            "provider_id": "openai"\n\
+            }}\n\
+            }},\n\
+            "specification_hash": "29157107315f37d091b6ea71fa1cbbc38a60fbd3dfff539a85e7924d7ede7342",\n\
+            "inputs": [\n\
+                {{\n\
+                "data": [\n\
+                    {data_str}\n\
+                ]\n\
+                }}\n\
+            ],\n\
+            "blocking": true\n\
+            }}\'!\n'
+        return data_str, cmd_str
         
 
 #2 Send the data to the API
 def send_request(df):
-    response = requests.post(dust_api_url, json=df)
+    response = requests.post(cmd_str, json=df)
     if response.status_code == 200:
         return response.json()
         print(response.content)
