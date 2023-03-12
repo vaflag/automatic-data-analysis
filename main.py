@@ -3,6 +3,7 @@ import os
 import plotly.express as px
 from io import StringIO
 from typing import Dict
+from dotenv import load_dotenv
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -10,9 +11,10 @@ import requests
 import streamlit as st
 import altair as alt
 
-from dotenv import load_dotenv
+from graph_gen import get_graph_from_text
 
-load_dotenv()  # Loads environment variables from .env file
+# Loads environment variables from .env file
+load_dotenv()
 plt.ioff()
 
 
@@ -90,6 +92,18 @@ def main():
                         except Exception as e:
                             st.write(e)
                         counter += 1
+
+    text_input = st.text_input(
+        "Input any new analysis needed", "No text given"
+    )
+    df = pd.read_csv("data/google_website_data.csv")
+    df["date"] = pd.to_datetime(df["date"], format="%Y%m%d")
+    if text_input != "No text given":
+        res_code = get_graph_from_text(text_input)
+        columns = st.columns(2)
+        for col in columns[:1]:
+            with col:
+                exec(res_code)
 
 
 if __name__ == "__main__":
