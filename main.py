@@ -8,14 +8,16 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import requests
 import streamlit as st
-import altair as alt
-
 from dotenv import load_dotenv
 load_dotenv()  # Loads environment variables from .env file
 plt.ioff()
 
+
 def upload_csv():
-    uploaded_file = st.file_uploader("Choose a file")
+    # Use the file uploader in the container
+    with st.markdown('<div class="container">'):
+        uploaded_file = st.file_uploader('Upload a file')
+    # uploaded_file = st.file_uploader("Choose a file")
     if uploaded_file is not None:
         # To convert to a string based IO:
         stringio = StringIO(uploaded_file.getvalue().decode("utf-8"))
@@ -51,35 +53,41 @@ def get_graphs(data):
         return response["run"]["results"][0][0]["value"]
 
 
-
 def plot_graph(data, graph_code, graph_title):
     exec(graph_code)
-    st.subheader(graph_title)
+    st.markdown("<h5 style='text-align: center; color: grey;'>" +
+                graph_title + "</h3>", unsafe_allow_html=True)
 
 
 def main():
     st.set_page_config(layout="wide")
-    st.title("Graph Selector")
-    # st.set_option("deprecation.showPyplotGlobalUse", False)
+    # st.title("Data that speaks to you🎙")
+
+    st.markdown("<h1 style='text-align: center; color: black;'>Let your data speak to you🎙</h1>",
+                unsafe_allow_html=True)
+    st.set_option("deprecation.showPyplotGlobalUse", False)
     data = upload_csv()
 
     if data is not None:
-      graphs = get_graphs(data)
-      counter = 0
-      while counter < len(graphs):
-        with st.container():
-          columns = st.columns(min(3, len(graphs) - counter))
-          for column in columns:
-            with column:
-              code = graphs[counter]['plot']
-              title = graphs[counter]['title']
-              print('\n\n------------------\n\n')
-              print(code)
-              try:
-                plot_graph(data, code, title)
-              except Exception as e:
-                st.write(e)
-              counter += 1
+        graphs = get_graphs(data)
+        counter = 0
+        while counter < len(graphs):
+            with st.container():
+                columns = st.columns(min(3, len(graphs) - counter))
+                for column in columns:
+                    with column:
+                        chart_drawn = False
+                        while (counter < len(graphs) and not (chart_drawn)):
+                            code = graphs[counter]['plot']
+                            title = graphs[counter]['title']
+                            print('\n\n------------------\n\n')
+                            try:
+                                plot_graph(data, code, title)
+                                chart_drawn = True
+                            except Exception as e:
+                                print(e)
+                                pass
+                            counter += 1
 
 
 if __name__ == "__main__":
