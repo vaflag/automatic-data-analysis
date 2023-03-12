@@ -1,7 +1,6 @@
 import json
 import os
-import sys
-import textwrap
+import plotly.express as px
 from io import StringIO
 from typing import Dict
 
@@ -13,7 +12,7 @@ import altair as alt
 
 from dotenv import load_dotenv
 load_dotenv()  # Loads environment variables from .env file
-
+plt.ioff()
 
 def upload_csv():
     uploaded_file = st.file_uploader("Choose a file")
@@ -53,8 +52,9 @@ def get_graphs(data):
 
 
 
-def plot_graph(data, graph_code):
+def plot_graph(data, graph_code, graph_title):
     exec(graph_code)
+    st.subheader(graph_title)
 
 
 def main():
@@ -72,75 +72,14 @@ def main():
           for column in columns:
             with column:
               code = graphs[counter]['plot']
+              title = graphs[counter]['title']
               print('\n\n------------------\n\n')
               print(code)
               try:
-                plot_graph(data, code)
+                plot_graph(data, code, title)
               except Exception as e:
                 st.write(e)
               counter += 1
-      return
-
-      for i in range(len(graphs) / 3):
-        with st.container():
-          columns = st.columns(3)
-          for column in columns:
-             with column:
-              code="""
-# Convert the data to a pandas dataframe
-df = pd.DataFrame(data)
-
-# Convert the Date column to datetime format
-df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
-
-# Group the data by Date and calculate the sum of Weekly_Sales
-df = df.groupby('Date')['Weekly_Sales'].sum().reset_index()
-
-# Plot the graph
-st.title('Weekly sales trend over time')
-st.line_chart(df.set_index('Date'))
-"""           
-              try:
-                plot_graph(data, code)
-              except:
-                st.write("Error")
-              
-      
-
-    return
-
-    if data is not None:
-        st.write("File uploaded successfully!")
-        selected_graphs = []
-        graphs = get_graphs(data)
-
-        for graph in graphs:
-            code = graph['plot']
-
-            print(code)
-            exec(code)
-            return
-        return
-        """
-        if graphs is None:
-            st.write("Error retrieving response from API")
-        else:
-            for graph in graphs:
-                
-                if "plot" in graph:
-                    if st.checkbox(graph["title"]):
-                        selected_graphs.append(graph)
-            if selected_graphs:
-                plot_graphs(df, selected_graphs)
-                if st.button("Next"):
-                    st.write("Selected graphs:")
-                    for graph in selected_graphs:
-                        st.write(graph["title"])
-            else:
-                st.write("No graphs selected.")
-                """
-    else:
-        st.write("Please upload a CSV file.")
 
 
 if __name__ == "__main__":
