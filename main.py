@@ -63,6 +63,7 @@ def plot_graphs(df, graphs):
 
 
 def main():
+    st.set_page_config(layout="wide")
     st.title("Graph Selector")
     st.set_option("deprecation.showPyplotGlobalUse", False)
     data = upload_csv()
