@@ -10,6 +10,9 @@ import pandas as pd
 import requests
 import streamlit as st
 
+from dotenv import load_dotenv
+load_dotenv()  # Loads environment variables from .env file
+
 
 def upload_csv():
     uploaded_file = st.file_uploader("Choose a file")
