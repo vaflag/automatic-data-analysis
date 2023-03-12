@@ -70,7 +70,8 @@ def main():
     data = upload_csv()
 
     if data is not None:
-        graphs = get_graphs(data)
+        with st.spinner('Loading...'):
+            graphs = get_graphs(data)
         counter = 0
         while counter < len(graphs):
             with st.container():
