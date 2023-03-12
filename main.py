@@ -63,7 +63,7 @@ def main():
     st.set_page_config(layout="wide")
     # st.title("Data that speaks to you🎙")
 
-    st.markdown("<h1 style='text-align: center; color: black;'>Let your data speak to you🎙</h1>",
+    st.markdown("<h1 style='text-align: center; color: black; font-size: 100px; margin-top: 100px;'>Let your data speak to you🎙</h1>",
                 unsafe_allow_html=True)
     st.set_option("deprecation.showPyplotGlobalUse", False)
     data = upload_csv()
