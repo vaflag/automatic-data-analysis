@@ -1,9 +1,12 @@
+# Loads environment variables from .env file
+from dotenv import load_dotenv
+load_dotenv()
+
 import json
 import os
 import plotly.express as px
 from io import StringIO
 from typing import Dict
-from dotenv import load_dotenv
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -13,8 +16,6 @@ import altair as alt
 
 from graph_gen import get_graph_from_text
 
-# Loads environment variables from .env file
-load_dotenv()
 plt.ioff()
 
 
