@@ -1,21 +1,17 @@
-# Loads environment variables from .env file
-from dotenv import load_dotenv
-load_dotenv()
-
 import json
 import os
 import plotly.express as px
 from io import StringIO
 from typing import Dict
-
 import matplotlib.pyplot as plt
 import pandas as pd
 import requests
 import streamlit as st
 import altair as alt
 import seaborn
+from dotenv import load_dotenv
+load_dotenv()
 
-from graph_gen import get_graph_from_text
 
 plt.ioff()
 
@@ -35,8 +31,8 @@ def upload_csv(display_export):
                         "Upload a CSV 📂" + "</h3>", unsafe_allow_html=True)
             uploaded_file = st.file_uploader('Add your file here')
         with col4:
-                pass
-    
+            pass
+
     # uploaded_file = st.file_uploader("Choose a file")
     if uploaded_file is not None:
         # To convert to a string based IO:
@@ -82,6 +78,35 @@ def get_graphs(data):
         return response["run"]["results"][0][0]["value"]
 
 
+def get_chart_from_specification(data, specification):
+    print(specification)
+    # Json sample
+    data_sample = json.loads(data.head().to_json(orient="records"))
+    url = os.environ.get("DUST_SINGLE_CHART_APP_URL")
+    hash = os.environ.get("DUST_SINGLE_CHART_APP_HASH")
+    auth = "Bearer " + os.environ.get("DUST_SINGLE_CHART_APP_TOKEN")
+    headers = {"Authorization": auth, "Content-Type": "application/json"}
+    data = {
+        "specification_hash": hash,
+        "config": {"TITLE": {"provider_id": "openai", "model_id": "text-davinci-003", "use_cache": True},
+                   "CODE": {"provider_id": "openai", "model_id": "gpt-3.5-turbo-0301", "use_cache": True}
+                   },
+        "blocking": True,
+        "inputs": [
+            {
+                "data": data_sample,
+                "specification": specification,
+            }],
+    }
+    response = requests.post(url, headers=headers, json=data)
+    if response.status_code == 200:
+        response = response.json()
+        print(response["run"]["results"][0][0]["value"])
+        return response["run"]["results"][0][0]["value"]
+    else:
+        print(response.json())
+
+
 def plot_graph(data, graph_code, graph_title):
     exec(graph_code)
     st.markdown(
@@ -92,29 +117,40 @@ def plot_graph(data, graph_code, graph_title):
     )
 
 
-
 def main():
     st.set_page_config(
         page_title="Analytics 🪄",
         layout="wide"
     )
-    st.write('<style>div.block-container{padding-top:2rem;}</style>', unsafe_allow_html=True)
+    st.write(
+        '<style>div.block-container{padding-top:2rem;}</style>', unsafe_allow_html=True)
     st.markdown("<h1 style='text-align: center; color: black; font-size: 100px; margin-top: 100px;'>Let your data speak to you🎙</h1>",
                 unsafe_allow_html=True)
     st.set_option("deprecation.showPyplotGlobalUse", False)
     st.markdown('#')
+
     data = upload_csv(True)
-    graphs=[]
+    graphs = []
 
     if data is not None:
         with st.spinner('Loading...'):
             graphs = get_graphs(data)
 
         with st.container():
-            cols = st.columns(8)
-            with cols[7]:
-                st.button("Copy report link🔗")
-        
+            cols = st.columns([1, 4, 4, 4, 2, 1])
+            with cols[4]:
+                if st.button("Copy report link🔗"):
+                    specification = "Display device in function of visit start time"
+
+            with cols[1]:
+                # Create the input bar
+                specification = st.text_input(
+                    "Type something here and press enter:",
+                    placeholder="Need something else? 🔎"
+                )
+                if (specification):
+                    chart = get_chart_from_specification(data, specification)
+                    graphs.insert(0, chart)
 
         counter = 0
         while counter < len(graphs):
@@ -126,28 +162,15 @@ def main():
                         while counter < len(graphs) and not (chart_drawn):
                             code = graphs[counter]["plot"]
                             title = graphs[counter]["title"]
-                            print("\n\n------------------\n\n")
-                            print(code)
+                            # print("\n\n------------------\n\n")
+                            # print(code)
                             try:
                                 plot_graph(data, code, title)
                                 chart_drawn = True
                             except Exception as e:
-                                print(e)
+                                # print(e)
                                 pass
                             counter += 1
-
-    if (data is not None):
-      text_input = st.text_input(
-          "Input any new analysis needed", "No text given"
-      )
-      df = pd.read_csv("data/google_website_data.csv")
-      df["date"] = pd.to_datetime(df["date"], format="%Y%m%d")
-      if text_input != "No text given":
-          res_code = get_graph_from_text(text_input)
-          columns = st.columns(2)
-          for col in columns[:1]:
-              with col:
-                  exec(res_code)
 
 
 if __name__ == "__main__":
