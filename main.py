@@ -16,7 +16,7 @@ load_dotenv()
 plt.ioff()
 
 
-def upload_csv(display_export):
+def upload_csv():
     with st.container():
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -43,7 +43,7 @@ def upload_csv(display_export):
         return data
 
 
-def get_graphs(data):
+def get_charts(data):
     # Json sample
     data_sample = json.loads(data.head().to_json(orient="records"))
     url = os.environ.get("DUST_APP_URL")
@@ -107,7 +107,7 @@ def get_chart_from_specification(data, specification):
         print(response.json())
 
 
-def plot_graph(data, graph_code, graph_title):
+def draw_chart(data, graph_code, graph_title):
     exec(graph_code)
     st.markdown(
         "<h5 style='text-align: center; color: black;'>"
@@ -129,12 +129,12 @@ def main():
     st.set_option("deprecation.showPyplotGlobalUse", False)
     st.markdown('#')
 
-    data = upload_csv(True)
-    graphs = []
+    data = upload_csv()
+    charts = []
 
     if data is not None:
         with st.spinner('Loading...'):
-            graphs = get_graphs(data)
+            charts = get_charts(data)
 
         with st.container():
             cols = st.columns([1, 4, 4, 4, 2, 1])
@@ -150,22 +150,22 @@ def main():
                 )
                 if (specification):
                     chart = get_chart_from_specification(data, specification)
-                    graphs.insert(0, chart)
+                    charts.insert(0, chart)
 
         counter = 0
-        while counter < len(graphs):
+        while counter < len(charts):
             with st.container():
-                columns = st.columns(min(3, len(graphs) - counter))
+                columns = st.columns(min(3, len(charts) - counter))
                 for column in columns:
                     with column:
                         chart_drawn = False
-                        while counter < len(graphs) and not (chart_drawn):
-                            code = graphs[counter]["plot"]
-                            title = graphs[counter]["title"]
+                        while counter < len(charts) and not (chart_drawn):
+                            code = charts[counter]["plot"]
+                            title = charts[counter]["title"]
                             # print("\n\n------------------\n\n")
                             # print(code)
                             try:
-                                plot_graph(data, code, title)
+                                draw_chart(data, code, title)
                                 chart_drawn = True
                             except Exception as e:
                                 # print(e)
