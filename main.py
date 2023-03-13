@@ -135,6 +135,7 @@ def main():
     if data is not None:
         with st.spinner('Loading...'):
             charts = get_charts(data)
+        st.markdown("""---""")
 
         with st.container():
             cols = st.columns([1, 4, 4, 4, 2, 1])
