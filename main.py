@@ -10,11 +10,12 @@ import pandas as pd
 import requests
 import streamlit as st
 import altair as alt
+import sys
 
+load_dotenv()
 from graph_gen import get_graph_from_text
 
-# Loads environment variables from .env file
-load_dotenv()
+
 plt.ioff()
 
 
@@ -87,6 +88,8 @@ def main():
     )
     st.set_option("deprecation.showPyplotGlobalUse", False)
     data = upload_csv()
+    print("ok")
+    print(os.environ)
 
     if data is not None:
         graphs = get_graphs(data)
